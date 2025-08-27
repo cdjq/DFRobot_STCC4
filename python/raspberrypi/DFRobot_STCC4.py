@@ -1,3 +1,17 @@
+"""!
+    * @file DFRobot_STCC4.py
+    * @brief Declaration the basic structure of class DFRobot_STCC4
+    * @n It is possible to measure the concentration of carbon dioxide in the air.
+    * @n If the humidity and temperature sensor is connected, temperature and humidity can also be obtained.
+    * @n Only supports IIC communication interface
+    * @copyright	Copyright (c) 2025 DFRobot Co.Ltd (http://www.dfrobot.com)
+    * @license The MIT License (MIT)
+    * @author [lbx](liubx8023@gmail.com)
+    * @version V1.0
+    * @date 2025-08-15
+    * @url https://github.com/DFRobot/DFRobot_STCC4
+ """
+
 import smbus2
 import time
 from typing import Optional, Tuple, Union
