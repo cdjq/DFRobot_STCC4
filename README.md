@@ -10,8 +10,8 @@ high-volume applications. The STCC4 is 100% factory-calibrated and enables autom
 compensation of the CO2 output for humidity and temperature through an external SHT4x sensor.
 ![Fermion_BMV080](image/Fermion_BMV080.JPG)
  
-## Product Link
-    SKU:XXXXX
+## Product Link（[https://www.dfrobot.com.cn](https://www.dfrobot.com.cn)）
+    SKU:SEN0678
 
 ## Table of Contents
 
@@ -172,8 +172,8 @@ raspberry pi       |      √       |              |             |
 
 ## History
 
-- 2025/08/15 - Version 1.0.0 released.
+- 2025/10/23 - Version 1.0.0 released.
 
 ## Credits
 
-Written by Alexander(ouki.wang@dfrobot.com), 2025. (Welcome to our [website](https://www.dfrobot.com/))
+Written by lbx(liubx8023@gmail.com), 2025. (Welcome to our [website](https://www.dfrobot.com/))

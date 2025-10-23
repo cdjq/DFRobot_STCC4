@@ -62,11 +62,7 @@ public:
      * @retunr None
      */
   DFRobot_STCC4(void);
-
-  virtual bool writeData(uint16_t cmd, uint16_t * pBuf, size_t size) = 0;
-  virtual bool writeCMD8(uint8_t cmd) = 0;
-  virtual bool writeCMD16(uint16_t cmd) = 0;
-  virtual size_t readData(uint8_t * pBuf, size_t size) = 0;
+  ~DFRobot_STCC4();
 
   /**
      * @fn calculationCRC
@@ -110,9 +106,9 @@ public:
      * @return true if successful, false otherwise
      */
   bool measurement(uint16_t* co2Concentration, 
-                                        float* temperature, 
-                                        float* humidity, 
-                                        uint16_t* sensorStatus);
+                   float* temperature, 
+                   float* humidity, 
+                   uint16_t* sensorStatus);
 
   /**
      * @fn setRHTcompensation
@@ -189,6 +185,42 @@ public:
      * @return true if successful, false otherwise
      */
   bool forcedRecalibration(uint16_t targetPpm, uint16_t* frcCorrection);
+
+private:
+   /**
+     * @fn writeData
+     * @brief Write data to the sensor
+     * @param cmd Command to write
+     * @param pBuf Pointer to the data buffer
+     * @param size Size of the data buffer
+     * @return true if successful, false otherwise
+     */
+   virtual bool writeData(uint16_t cmd, uint16_t * pBuf, size_t size) = 0;
+
+   /**
+     * @fn writeCMD8
+     * @brief Write an 8-bit command to the sensor
+     * @param cmd Command to write
+     * @return true if successful, false otherwise
+     */
+   virtual bool writeCMD8(uint8_t cmd) = 0;
+
+   /**
+     * @fn writeCMD16
+     * @brief Write a 16-bit command to the sensor
+     * @param cmd Command to write
+     * @return true if successful, false otherwise
+     */
+   virtual bool writeCMD16(uint16_t cmd) = 0;
+
+   /**
+     * @fn readData
+     * @brief Read data from the sensor
+     * @param pBuf Pointer to the data buffer
+     * @param size Size of the data buffer
+     * @return Number of bytes read, or 0 if an error occurred
+     */
+   virtual size_t readData(uint8_t * pBuf, size_t size) = 0;
 };
 
 class DFRobot_STCC4_I2C:public DFRobot_STCC4{

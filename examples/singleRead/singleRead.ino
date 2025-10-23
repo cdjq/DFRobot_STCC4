@@ -15,56 +15,131 @@
  */
 
 #include "DFRobot_STCC4.h"
-#include <string.h>
 
 
-//You can choose to use either the IIC interface or the SPI interface. The default is IIC. 
-//If you want to use SPI, simply remove the following comments.
-DFRobot_STCC4_I2C sensor(&Wire, 0x64); // Create an instance of the DFRobot_STCC4_I2C class with the I2C address 0x57.
+/**
+ * Set temperature compensation.
+ * The unit is degrees Celsius.
+ * It only takes effect when the temperature and humidity sensor is disconnected from the STCC4.
+ */
+uint16_t tCompensation = 26;
+
+/**
+ * Set humidity compensation.
+ * It only takes effect when the temperature and humidity sensor is disconnected from the STCC4.
+ */
+uint16_t hCompensation = 55;
+
+/**
+ * Set humidity compensation.
+ * Unit is hPa.
+ */
+uint16_t pCompensation = 950;
+
+/**
+ * The environmental temperature obtained from STCC4. 
+ * If no temperature and humidity sensor is connected, this value will be the default value or the set value.
+ */
+float temperature;
+
+/**
+ * The environmental humidity obtained from STCC4. 
+ * If no temperature and humidity sensor is connected, this value will be the default value or the set value.
+ */
+float humidity;
+
+/* The CO2 concentration obtained from STCC4. */
+uint16_t co2Concentration;
+
+/* The status of the sensor. */
+uint16_t sensorStatus;
+
+/**
+ * The sensor can communicate via two specific addresses (0x64 and 0x65).
+ * "Dip switch" (for Gravity version): A small switch on the board that you can toggle by hand.
+ */
+const uint8_t ADDR = 0x64;
+
+DFRobot_STCC4_I2C sensor(&Wire, ADDR); // Create an instance of the DFRobot_STCC4_I2C class with the I2C address ADDR.
 
 
 void setup() {
-  char id[18];
   Serial.begin(115200);
   while(!Serial) delay(100); // Wait for the serial port to be ready.
   Serial.println("This is a demo of single reading sensor data.");
   Serial.println("This demo will display a \"Data write failed\", but this is a normal occurrence.");
   Serial.println("Because the sensor has entered sleep mode, there will be no response when it is awakened.\n\n");
 
-  while(sensor.begin()){
+  /* Initialize the sensor */
+  while(!sensor.begin()){
     Serial.println("Init error!!!");
     delay(500);
   }
-  /* Read sensor ID */
+
+  /* Wake up the sensor */
+  sensor.wakeup();
+
+  /**
+   * Get the ID of the sensor.
+   * The ID values read should all be 0x0901018a.
+   */
+  char id[15];
   while(!sensor.getID(id)){
     delay(500);
+    Serial.println("Get ID error!");
   }
-  sprintf(id, "%02x%02x%02x%02x", id[0], id[1], id[3], id[4]);
-  Serial.print("ID: ");
+  sprintf(id, "ID: %02x%02x%02x%02x", id[0], id[1], id[2], id[3]);
   Serial.println(id);
-}
 
-uint16_t co2Concentration;
-float temperature;
-float humidity;
-uint16_t sensorStatus;
+  /**
+    * @brief Set temperature and humidity compensation
+    * @param temperature Temperature compensation value
+    * @param humidity Humidity compensation value
+    * @return true if successful, false otherwise
+    */
+  if(sensor.setRHTcompensation(tCompensation, hCompensation)){
+    Serial.println("Set RHT compensation successful.");
+  }else{
+    Serial.println("Set RHT compensation error!");
+  }
+
+  /**
+    * @brief Set pressure compensation
+    * @param pressure Pressure compensation value
+    * @return true if successful, false otherwise
+    */
+  if(sensor.setPressureCompensation(pCompensation)){
+    Serial.println("Set pressure compensation successful.");
+  }else{
+    Serial.println("Set pressure compensation error!");
+  }
+}
 
 void loop() {
   /* Wake up the sensor */
   sensor.wakeup();
   delay(100);
+
+  /* Start a single-shot measurement */
   sensor.singleShot();
-  delay(500);
+  delay(900);
+
   /* Read sensor data */
-  if(sensor.measurement(&co2Concentration, &temperature, &humidity, &sensorStatus)){
-    String output = "CO2: " + String(co2Concentration) + 
-                    " ppm   Temperature: " + String(temperature, 2) + 
-                    " C   Humidity: " + String(humidity, 2) + " %";
-    Serial.println(output);
+  if(sensor.measurement(&co2Concentration,&temperature,&humidity,&sensorStatus)){
+    Serial.print("CO2:");
+    Serial.print(co2Concentration);
+    Serial.print(" ppm ");
+    Serial.print(" temperature:");
+    Serial.print(temperature);
+    Serial.print(" ℃ ");
+    Serial.print(" humidity:");
+    Serial.print(humidity);
+    Serial.println(" % ");
   }
+
   /* Enter sleep mode */
   sensor.sleep();
-  Serial.print("sleep 10s");
+  Serial.println("sleep 10s");
   delay(9000);
 }
 

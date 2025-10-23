@@ -1,6 +1,7 @@
 /*!
  * @file reaclibration.ino
- * @brief This routine first conducts 30 consecutive samplings, then performs calibration, and subsequently continues with continuous sampling.
+ * @brief This routine will calibrate the sensor, but it requires the actual CO2 concentration in the environment to be known. 
+ * @n The routine will perform 30 pre-calibration samplings, then conduct the calibration, and continue sampling after the calibration.
  * @n If you connect the humidity and temperature sensor, you can obtain the concentration of carbon dioxide and temperature and humidity.
  * @n If the temperature and humidity sensors are not connected, the obtained temperature and humidity values is the default values.
  * @n The demo supports FireBeetle-ESP32, and FireBeetle-ESP8266, Arduino Uno, Leonardo, Mega2560, FireBeetle-M0.
@@ -17,74 +18,183 @@
 #include "DFRobot_STCC4.h"
 #include <string.h>
 
-DFRobot_STCC4_I2C sensor(&Wire, 0x64); // Create an instance of the DFRobot_STCC4_I2C class with the I2C address 0x64.
+/**
+ * The target CO2 concentration to calibrate. 
+ * The input range of CO2 concentration is 0 - 32000 ppm.
+ */
+uint16_t target = 600; 
 
-uint16_t target = 500; // Target CO2 concentration for calibration
-uint16_t correction;
-uint16_t co2Concentration;
+/* The frc correction values returned by the sensor are generally not used. */
+uint16_t frcCorrection;
+
+/**
+ * The environmental temperature obtained from STCC4. 
+ * If no temperature and humidity sensor is connected, this value will be the default value or the set value.
+ */
 float temperature;
+
+/**
+ * The environmental humidity obtained from STCC4. 
+ * If no temperature and humidity sensor is connected, this value will be the default value or the set value.
+ */
 float humidity;
+
+/* The CO2 concentration obtained from STCC4. */
+uint16_t co2Concentration;
+
+/* The status of the sensor. */
 uint16_t sensorStatus;
 
+/**
+ * Set temperature compensation.
+ * The unit is degrees Celsius.
+ * It only takes effect when the temperature and humidity sensor is disconnected from the STCC4.
+ */
+uint16_t tCompensation = 26;
+
+/**
+ * Set humidity compensation.
+ * The unit is %.
+ * It only takes effect when the temperature and humidity sensor is disconnected from the STCC4.
+ */
+uint16_t hCompensation = 55;
+
+/**
+ * Set humidity compensation.
+ * Unit is hPa.
+ */
+uint16_t pCompensation = 950;
+
+/**
+ * The sensor can communicate via two specific addresses (0x64 and 0x65).
+ * "Dip switch" (for Gravity version): A small switch on the board that you can toggle by hand.
+ */
+const uint8_t ADDR = 0x64;
+
+DFRobot_STCC4_I2C sensor(&Wire, ADDR); // Create an instance of the DFRobot_STCC4_I2C class with the I2C address ADDR.
 
 void setup() {
-  char id[18];
-
   Serial.begin(115200);
   while(!Serial) delay(100); // Wait for the serial port to be ready.
+  Serial.println("This demo will force-calibrate the sensor based on the CO2 concentration you input.\n");
 
-  Serial.println("This demo will force-calibrate the sensor based on the CO2 concentration you input.\n\n");
-  delay(1000);
-  while(sensor.begin()){
+  /* Initialize the sensor */
+  while(!sensor.begin()){
     Serial.println("Init error!");
     delay(500);
   }
-  /* Read sensor ID */
+
+  /* Wake up the sensor */
+  sensor.wakeup();
+  delay(10);
+
+  /**
+   * Get the ID of the sensor.
+   * The ID values read should all be 0x0901018a.
+   */
+  char id[15];
   while(!sensor.getID(id)){
     delay(500);
     Serial.println("Get ID error!");
   }
-  sprintf(id, "%02x%02x%02x%02x", id[0], id[1], id[3], id[4]);
-  Serial.print("ID: ");
+  sprintf(id, "ID: %02x%02x%02x%02x", id[0], id[1], id[2], id[3]);
   Serial.println(id);
   
-  sensor.wakeup();
-  delay(10);
+  /**
+    * @brief Set temperature and humidity compensation
+    * @param temperature Temperature compensation value
+    * @param humidity Humidity compensation value
+    * @return true if successful, false otherwise
+    */
+  if(sensor.setRHTcompensation(tCompensation, hCompensation)){
+    Serial.println("Set RHT compensation successful.");
+  }else{
+    Serial.println("Set RHT compensation error!");
+  }
+
+  /**
+    * @brief Set pressure compensation
+    * @param pressure Pressure compensation value
+    * @return true if successful, false otherwise
+    */
+  if(sensor.setPressureCompensation(pCompensation)){
+    Serial.println("Set pressure compensation successful.");
+  }else{
+    Serial.println("Set pressure compensation error!");
+  }
+
   /* Start 30 consecutive samplings */
   sensor.startMeasurement();
   for(uint8_t i = 0; i < 30; i++){
-    delay(1000);
+    delay(2000);
+    /**
+    * @brief Read measurement data
+    * @param co2Concentration Pointer to store CO2 concentration
+    * @param temperature Pointer to store temperature
+    * @param humidity Pointer to store humidity
+    * @param sensorStatus Pointer to store sensor status
+    * @return true if successful, false otherwise
+    */
     if(sensor.measurement(&co2Concentration,&temperature,&humidity,&sensorStatus)){
-      String output = "Before calibration CO2: " + String(co2Concentration) + 
-                      " ppm   Temperature: " + String(temperature, 2) + 
-                      " C   Humidity: " + String(humidity, 2) + " %";
-      Serial.println(output);
+      Serial.print("CO2:");
+      Serial.print(co2Concentration);
+      Serial.print(" ppm ");
+      Serial.print(" temperature:");
+      Serial.print(temperature);
+      Serial.print(" ℃ ");
+      Serial.print(" humidity:");
+      Serial.print(humidity);
+      Serial.println(" % ");
     }
   }
+
+  /* Stop sampling */
   sensor.stopMeasurement();
   delay(1000);
+
   /* Start calibration */
-  sensor.forcedRecalibration(target, &correction);
-  while(correction == 0xffff || correction == 0){
+  /**
+    * @brief Perform forced recalibration
+    * @param targetPpm Target PPM value for recalibration
+    * @param frcCorrection Pointer to store the correction value
+    * @return true if successful, false otherwise
+    */
+  sensor.forcedRecalibration(target, &frcCorrection);
+
+  /**The calibration is determined to be valid by checking the value of frc. 
+    *If frc is equal to 0xffff or 0, it is invalid; otherwise, it is valid.  
+    */
+  while(frcCorrection == 0xffff || frcCorrection == 0){
     Serial.println("Calibration failed!\n");
     delay(1000);
-    sensor.forcedRecalibration(target, &correction);
+    sensor.forcedRecalibration(target, &frcCorrection);
   }
   Serial.print("CO2 concentration correction:");
-  Serial.println(correction);
-  sensor.wakeup();
-  delay(10);
+  Serial.println(frcCorrection);
+
+  /* Start sampling */
   sensor.startMeasurement();
-  delay(500);
 }
 
 void loop() {
-  delay(1000);
-  /* Read sensor data */
-  if(sensor.measurement(&co2Concentration,&temperature,&humidity,&sensorStatus)){
-    String output = "CO2: " + String(co2Concentration) + 
-                    " ppm   Temperature: " + String(temperature, 2) + 
-                    " C   Humidity: " + String(humidity, 2) + " %";
-    Serial.println(output);
-  }
+  delay(2000);
+  /**
+    * @brief Read measurement data
+    * @param co2Concentration Pointer to store CO2 concentration
+    * @param temperature Pointer to store temperature
+    * @param humidity Pointer to store humidity
+    * @param sensorStatus Pointer to store sensor status
+    * @return true if successful, false otherwise
+    */
+    if(sensor.measurement(&co2Concentration,&temperature,&humidity,&sensorStatus)){
+      Serial.print("CO2:");
+      Serial.print(co2Concentration);
+      Serial.print(" ppm ");
+      Serial.print(" temperature:");
+      Serial.print(temperature);
+      Serial.print(" ℃ ");
+      Serial.print(" humidity:");
+      Serial.print(humidity);
+      Serial.println(" % ");
+    }
 }

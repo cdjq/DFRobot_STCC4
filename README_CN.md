@@ -5,8 +5,8 @@
 STCC4 是森思罗公司推出的下一代微型二氧化碳传感器，专为室内空气质量应用而设计。它基于热导率传感原理，并采用了森思罗公司的 CMOSens® 技术，能够以极高的性价比和紧凑的尺寸实现对室内空气环境中二氧化碳浓度的监测。STCC4 支持 SMD 组装以及卷带式封装，这使得其能够以经济且高效的方式集成到大规模应用中。STCC4 100% 在工厂进行校准，并可通过外部 SHT4x 传感器自动对二氧化碳输出进行补偿，以适应湿度和温度的变化。
 ![Fermion_STCC4](image/Fermion_STCC4.JPG)
 
-## 产品链接
-    SKU:XXXXX
+## 产品链接（[https://www.dfrobot.com.cn](https://www.dfrobot.com.cn)）
+    SKU:SEN0678
 
 ## 目录
 
@@ -167,8 +167,8 @@ raspberry pi       |      √       |              |             |
 
 ## 历史
 
-- 2025/08/015 - Version 1.0.0  版本
+- 2025/10/23 - Version 1.0.0  版本
 
 ## 创作者
 
-Written by Alexander(ouki.wang@dfrobot.com), 2025. (Welcome to our [website](https://www.dfrobot.com/))
+作者： lbx(liubx8023@gmail.com), 2025. (欢迎访问我们的 [网站](https://www.dfrobot.com/))

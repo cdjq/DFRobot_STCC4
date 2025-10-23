@@ -1,34 +1,36 @@
 #######################################
-# Syntax Map For DFRobot_STCC4        #
-#######################################
-# Class
+# Syntax Map For DFRobot_STCC4
 #######################################
 
-DFRobot_STCC4 KEYWORD1
-DFRobot_STCC4_I2C KEYWORD1
-
 #######################################
-# Methods and Functions
+# Class (KEYWORD1)
 #######################################
 
-calculationCRC KEYWORD2
-getID KEYWORD2
-startMeasurement KEYWORD2
-stopMeasurement KEYWORD2
-measurement KEYWORD2
-setRHTcompensation KEYWORD2
-setPressureCompensation KEYWORD2
-singleShot KEYWORD2
-sleep KEYWORD2
-wakeup KEYWORD2
-softRest KEYWORD2
-factoryReset KEYWORD2
-enableTestingMode KEYWORD2
-disableTestingMode KEYWORD2
-forcedRecalibration KEYWORD2
+DFRobot_STCC4	KEYWORD1
+DFRobot_STCC4_I2C	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+calculationCRC	KEYWORD2
+getID	KEYWORD2
+startMeasurement	KEYWORD2
+stopMeasurement	KEYWORD2
+measurement	KEYWORD2
+setRHTcompensation	KEYWORD2
+setPressureCompensation	KEYWORD2
+singleShot	KEYWORD2
+sleep	KEYWORD2
+wakeup	KEYWORD2
+softRest	KEYWORD2
+factoryReset	KEYWORD2
+enableTestingMode	KEYWORD2
+disableTestingMode	KEYWORD2
+forcedRecalibration	KEYWORD2
 
 #########################################################
-# Constants
+# Constants (LITERAL1)
 #########################################################
 
-DFRobot_STCC4_I2C_ADDR LITERAL1
+DFRobot_STCC4_I2C_ADDR	LITERAL1

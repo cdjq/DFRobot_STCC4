@@ -1,8 +1,21 @@
-#include <DFRobot_STCC4.h>
+/*!
+ * @file DFRobot_STCC4.cpp
+ * @brief Implement the basic structure of class DFRobot_STCC4
+ * @n It is possible to measure the concentration of carbon dioxide in the air.
+ * @n If the humidity and temperature sensor is connected, temperature and humidity can also be obtained.
+ * @n Only supports IIC communication interface
+ * @copyright	Copyright (c) 2025 DFRobot Co.Ltd (http://www.dfrobot.com)
+ * @license The MIT License (MIT)
+ * @author [lbx](liubx8023@gmail.com)
+ * @version V1.0
+ * @date 2025-08-15
+ * @url https://github.com/DFRobot/DFRobot_STCC4
+ */
 
-DFRobot_STCC4::DFRobot_STCC4(void) {
-  
-}
+#include <DFRobot_STCC4.h>
+DFRobot_STCC4::DFRobot_STCC4(void) {}
+
+DFRobot_STCC4::~DFRobot_STCC4(void) {}
 
 uint8_t DFRobot_STCC4::calculationCRC(uint16_t *data, size_t length)
 {
@@ -32,14 +45,18 @@ uint8_t DFRobot_STCC4::calculationCRC(uint16_t *data, size_t length)
   return crc;
 }
 
-bool DFRobot_STCC4::getID(char *id)
+bool DFRobot_STCC4::getID(char *id)  
 {
-  uint8_t rBuf[18];
+  uint8_t rBuf[6];
   writeCMD16(STCC4_GET_ID);
-  if(readData(rBuf, 18) != 18)
-    return false;
+  if(readData(rBuf, 6) != 6){
+    return false;               
+  }
  
-  memcpy(id, rBuf, 18);
+  id[0] = rBuf[0];
+  id[1] = rBuf[1];
+  id[2] = rBuf[3];
+  id[3] = rBuf[4];
 
   return true;
 }
@@ -68,9 +85,12 @@ bool DFRobot_STCC4::measurement(uint16_t* co2Concentration,
                                         uint16_t* sensorStatus)
 {
   uint8_t rBuf[12];
-  writeCMD16(STCC4_READ_MEASURE);
-  if(readData(rBuf, 12) != 12)
+  if(writeCMD16(STCC4_READ_MEASURE) != ERR_OK){
     return false;
+  }
+  if(readData(rBuf, 12) != 12){
+    return false;
+  }
 
   *co2Concentration = (rBuf[0] << 8) | rBuf[1];
   int16_t tempRaw = (rBuf[3] << 8) | rBuf[4];
@@ -203,13 +223,13 @@ bool DFRobot_STCC4_I2C::begin(void)
     Serial.println("_pWire == NULL");
     return ERR_DATA_BUS;
   }
-  return _pWire->endTransmission() == 0 ? ERR_OK : ERR_DATA_BUS; 
+  return _pWire->endTransmission() == 0 ? true : false; 
 }
 
 DFRobot_STCC4_I2C::DFRobot_STCC4_I2C(TwoWire *pWire, uint8_t addr) {
   _pWire = pWire;
   _deviceAddr = addr;
-  //_pWire->setClock(400000);
+  _pWire->setClock(100000);
 }
 
 bool DFRobot_STCC4_I2C::writeData(uint16_t cmd, uint16_t * pBuf, size_t size)
@@ -279,21 +299,11 @@ bool DFRobot_STCC4_I2C::writeCMD16(uint16_t cmd)
 
 size_t DFRobot_STCC4_I2C::readData(uint8_t * pBuf, size_t size)
 {
-  // uint8_t buf[2];
   size_t ret = 0;
-  // buf[0] = (cmd >> 8) & 0xFF;
-  // buf[1] = cmd & 0xFF;
+
   if(_pWire == NULL) {
     Serial.println("_pWire == NULL");
   }
-
-  // _pWire->beginTransmission(_deviceAddr);
-  // _pWire->write(buf[0]);
-  // _pWire->write(buf[1]);
-  // if( _pWire->endTransmission() != 0){
-  //   //DBG("I2C read error");
-  //   return ERR_DATA_READ;
-  // }
 
   ret = _pWire->requestFrom(_deviceAddr, (uint8_t) size);
   for (size_t i = 0; i < size; i++) {
