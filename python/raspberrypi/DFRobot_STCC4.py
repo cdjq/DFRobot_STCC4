@@ -201,7 +201,6 @@ class DFRobot_STCC4_I2C(DFRobot_STCC4):
         try:
             self._bus = smbus2.SMBus(self.I2C_BUS)
         except Exception as e:
-            print(f"Error initializing I2C bus: {e}")
             self._bus = None
  
     def _write_cmd16(self, cmd: int) -> bool:
@@ -211,7 +210,6 @@ class DFRobot_STCC4_I2C(DFRobot_STCC4):
         :return: True if successful, False otherwise
         """
         if self._bus is None:
-            print("I2C bus not initialized")
             return False
             
         try:
@@ -220,7 +218,6 @@ class DFRobot_STCC4_I2C(DFRobot_STCC4):
             self._bus.write_i2c_block_data(self._device_addr, bytes_to_send[0], [bytes_to_send[1]])
             return True
         except Exception as e:
-            print(f"Error writing 16-bit command: {e}")
             return False
  
     def _write_cmd8(self, cmd: int) -> bool:
@@ -230,14 +227,12 @@ class DFRobot_STCC4_I2C(DFRobot_STCC4):
         :return: True if successful, False otherwise
         """
         if self._bus is None:
-            print("I2C bus not initialized")
             return False
             
         try:
             self._bus.write_byte(self._device_addr, cmd)
             return True
         except Exception as e:
-            print(f"Error writing 8-bit command: {e}")
             return False
  
     def _write_data(self, cmd: int, data: Union[list, tuple]) -> bool:
@@ -274,7 +269,6 @@ class DFRobot_STCC4_I2C(DFRobot_STCC4):
             
             return True
         except Exception as e:
-            print(f"Error writing data: {e}")
             return False
  
     def _read_data(self, cmd: int, length: int) -> Optional[bytes]:
@@ -292,7 +286,6 @@ class DFRobot_STCC4_I2C(DFRobot_STCC4):
             data = self._bus.read_i2c_block_data(self._device_addr, 0, length)
             return bytes(data)
         except Exception as e:
-            print(f"Error reading data: {e}")
             return None
  
     def get_id(self):
@@ -301,11 +294,12 @@ class DFRobot_STCC4_I2C(DFRobot_STCC4):
         Returns:
             int: 32-bit sensor ID
         """
-        r_buf = self._read_data(self.STCC4_GET_ID, 18)
-        if r_buf is None or len(r_buf) < 5:
-            return None
-        time.sleep(0.05)
-        id_value = (r_buf[0] << 24) | (r_buf[1] << 16) | (r_buf[3] << 8) | r_buf[4]
+        for i in range(5):
+            r_buf = self._read_data(self.STCC4_GET_ID, 18)
+            id_value = (r_buf[0] << 24) | (r_buf[1] << 16) | (r_buf[3] << 8) | r_buf[4]
+            if id_value == 0x901018A:
+                return id_value
+            time.sleep(0.2)
 
         return id_value
  
@@ -366,7 +360,7 @@ class DFRobot_STCC4_I2C(DFRobot_STCC4):
     def single_measurement(self) -> bool:
         """Perform single shot measurement"""
         return self._write_cmd16(self.STCC4_SINGLE_SHOT)
- 
+
     def fall_asleep(self) -> bool:
         """Put sensor to sleep"""
         return self._write_cmd16(self.STCC4_SLEEP)

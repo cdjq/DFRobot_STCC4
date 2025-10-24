@@ -47,15 +47,19 @@ uint8_t DFRobot_STCC4::calculationCRC(uint16_t *data, size_t length)
 
 uint32_t DFRobot_STCC4::getID(void)  
 {
-  uint8_t rBuf[18];
-  uint32_t id;
-  writeCMD16(STCC4_GET_ID);
-  delay(50);
-  readData(rBuf, 18);
-  delay(50);
-  id = ((uint32_t)rBuf[0] << 24) | ((uint32_t)rBuf[1] << 16) | ((uint32_t)rBuf[3] << 8) | (uint32_t)rBuf[4];
-
-  return id;
+  for (uint8_t i = 0; i < 5; i++){
+    uint8_t rBuf[18] = {0};
+    uint32_t id;
+    writeCMD16(STCC4_GET_ID);
+    readData(rBuf, 18);
+    id = ((uint32_t)rBuf[0] << 24) | ((uint32_t)rBuf[1] << 16) | ((uint32_t)rBuf[3] << 8) | (uint32_t)rBuf[4];
+    if(id == 0x901018A){
+      return id;
+    }
+    delay(200);
+  }
+  
+  return 0;
 }
 
 bool DFRobot_STCC4::startMeasurement(void)
