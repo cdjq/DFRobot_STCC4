@@ -45,20 +45,17 @@ uint8_t DFRobot_STCC4::calculationCRC(uint16_t *data, size_t length)
   return crc;
 }
 
-bool DFRobot_STCC4::getID(char *id)  
+uint32_t DFRobot_STCC4::getID(void)  
 {
-  uint8_t rBuf[6];
+  uint8_t rBuf[18];
+  uint32_t id;
   writeCMD16(STCC4_GET_ID);
-  if(readData(rBuf, 6) != 6){
-    return false;               
-  }
- 
-  id[0] = rBuf[0];
-  id[1] = rBuf[1];
-  id[2] = rBuf[3];
-  id[3] = rBuf[4];
+  delay(50);
+  readData(rBuf, 18);
+  delay(50);
+  id = ((uint32_t)rBuf[0] << 24) | ((uint32_t)rBuf[1] << 16) | ((uint32_t)rBuf[3] << 8) | (uint32_t)rBuf[4];
 
-  return true;
+  return id;
 }
 
 bool DFRobot_STCC4::startMeasurement(void)
@@ -104,6 +101,10 @@ bool DFRobot_STCC4::measurement(uint16_t* co2Concentration,
 
 bool DFRobot_STCC4::setRHTcompensation(uint16_t temperature, uint16_t humidity)
 {
+  if(temperature < 10 || temperature > 40 || humidity < 20 || humidity > 80)
+  {
+    return false;
+  }
   uint16_t wBuf[2];
   temperature = (temperature + 45) * 65535 / 175; 
   humidity = (humidity + 6) * 65535 / 125; 
@@ -118,6 +119,10 @@ bool DFRobot_STCC4::setRHTcompensation(uint16_t temperature, uint16_t humidity)
 
 bool DFRobot_STCC4::setPressureCompensation(uint16_t pressure)
 {
+  if(pressure < 400 || pressure > 1100)
+  {
+    return false;
+  }
   pressure = pressure  * 50;
   if(writeData(STCC4_SET_PRESSURE_COMPENSATION, &pressure, 1) != ERR_OK){
     return false;
@@ -126,7 +131,7 @@ bool DFRobot_STCC4::setPressureCompensation(uint16_t pressure)
   return true;
 }
 
-bool DFRobot_STCC4::singleShot(void)
+bool DFRobot_STCC4::singleMeasurement(void)
 {
   if(writeCMD16(STCC4_SINGLE_SHOT) != ERR_OK){
     return false;
@@ -198,6 +203,10 @@ bool DFRobot_STCC4::disableTestingMode(void)
 
 bool DFRobot_STCC4::forcedRecalibration(uint16_t targetPpm, uint16_t* frcCorrection)
 {
+  if(targetPpm > 32000)
+  {
+    return false;
+  }
   uint16_t wBuf[1];
   uint8_t rBuf[3];
   wBuf[0] = targetPpm;
@@ -306,7 +315,7 @@ size_t DFRobot_STCC4_I2C::readData(uint8_t * pBuf, size_t size)
   }
 
   ret = _pWire->requestFrom(_deviceAddr, (uint8_t) size);
-  for (size_t i = 0; i < size; i++) {
+  for (size_t i = 0; i < ret; i++) {
     pBuf[i] = _pWire->read();
   }
 

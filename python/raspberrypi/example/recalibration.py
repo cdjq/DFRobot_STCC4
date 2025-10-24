@@ -41,16 +41,18 @@ co2Concentration = 0
 sensorStatus = 0
 
 # Set temperature compensation.
+# The range is 10 - 40℃.
 # The unit is degrees Celsius.
 # It only takes effect when the temperature and humidity sensor is disconnected from the STCC4.
 tCompensation = 26
 
 # Set humidity compensation.
-# The unit is %.
+# The range is 20 - 80%RH.
 # It only takes effect when the temperature and humidity sensor is disconnected from the STCC4.
 hCompensation = 55
 
-# Set humidity compensation.
+# Set pressure compensation.
+# The range is 400 - 1100 hPa.
 # Unit is hPa.
 pCompensation = 950
 
@@ -70,12 +72,11 @@ def setup():
 
     # Get the ID of the sensor.
     # The ID values read should all be 0x0901018a.
-    ID = sensor.get_id()
-    if ID:
-        print(f"ID: {ID[0]:02x}{ID[1]:02x}{ID[3]:02x}{ID[4]:02x}")
+    sensor_id = sensor.get_id()
+    if sensor_id is not None:
+        print(f"ID: 0x{sensor_id:X}")
     else:
-        print("Get ID error!")
-        return False
+        print("Failed to read sensor ID")
 
     # Set temperature and humidity compensation
     if sensor.set_rht_compensation(tCompensation, hCompensation):
@@ -98,10 +99,10 @@ def setup():
         time.sleep(2)  # 2000ms delay
         
         # Read measurement data
-        data = sensor.measurement()
-        if data:
-            co2, temp, hum, status = data
-            print(f"CO2: {co2} ppm  temperature: {temp:.2f} ℃  humidity: {hum:.2f} % ")
+        result = sensor.measurement()
+        if result is not None:
+            co2Concentration, temperature, humidity, sensorStatus = result
+            print(f"CO2: {co2Concentration} ppm  temperature: {temperature:.2f} ℃  humidity: {humidity:.2f} %  status: {sensorStatus}")
         else:
             print("Failed to read measurements")
 
@@ -133,19 +134,17 @@ def loop():
     time.sleep(2)  # 2000ms delay
     
     # Read measurement data
-    data = sensor.measurement()
-    if data:
-        co2, temp, hum, status = data
-        print(f"CO2: {co2} ppm  temperature: {temp:.2f} ℃  humidity: {hum:.2f} % ")
-        return True
+    result = sensor.measurement()
+    if result is not None:
+        co2Concentration, temperature, humidity, sensorStatus = result
+        print(f"CO2: {co2Concentration} ppm  temperature: {temperature:.2f} ℃  humidity: {humidity:.2f} %  status: {sensorStatus}")
     else:
         print("Failed to read measurements")
-        return False
 
 if __name__ == "__main__":
     if not setup():
         sys.exit(1)
-        
+
     try:
         while True:
             loop()

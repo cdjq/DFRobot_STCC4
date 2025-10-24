@@ -29,145 +29,126 @@ This library only provides one type of communication method: IIC, along with som
 
 ## Installation
 
-To use this library, first download the library file, paste it into the \Arduino\libraries directory, then open the examples folder and run the demo in the folder.
+To use this library, first download the library file, upload the file to your Raspberry Pi device, and then enter the "examples" folder and run the sample programs.
 
 
 ## Methods
 
-```C++
-/**
-     * @fn calculationCRC
-     * @brief Calculate the CRC of the data
-     * @param data Pointer to the data array
-     * @param length Length of the data array
-     * @return Calculated CRC value
-     */
-  uint8_t calculationCRC(uint16_t *data, size_t length);
+```python
+def get_id(self) -> Optional[bytes]:
+        """
+        Get the sensor ID
+        :return: Sensor ID as bytes if successful, None otherwise
+        """
+        raise NotImplementedError
+ 
+def start_measurement(self) -> bool:
+    """
+    Start continuous measurement
+    :return: True if successful, False otherwise
+    """
+    raise NotImplementedError
 
-  /**
-     * @fn getID
-     * @brief Get the ID of the sensor
-     * @param id Pointer to a character array to store the ID
-     * @return true if successful, false otherwise
-     */
-  bool getID(char *id);
+def stop_measurement(self) -> bool:
+    """
+    Stop continuous measurement
+    :return: True if successful, False otherwise
+    """
+    raise NotImplementedError
 
-  /**
-     * @fn startMeasurement
-     * @brief Start continuous measurement
-     * @return true if successful, false otherwise
-     */
-  bool startMeasurement(void);
+def measurement(self) -> Optional[Tuple[int, float, float, int]]:
+    """
+    Read measurement data
+    :return: Tuple of (co2_concentration, temperature, humidity, sensor_status).
+    co2_concentration : CO2 concentration
+    temperature : Temperature
+    humidity : Humidity
+    sensor_status : Sensor status
+    None : error
+    """
+    raise NotImplementedError
 
-  /**
-     * @fn stopMeasurement
-     * @brief Stop continuous measurement
-     * @n The sensor needs 1200 milliseconds to execute this instruction.
-     * @return true if successful, false otherwise
-     */
-  bool stopMeasurement(void);
+def set_rht_compensation(self, temperature: int, humidity: int) -> bool:
+    """
+    Set temperature and humidity compensation
+    :param temperature: Temperature compensation value
+    :param humidity: Humidity compensation value
+    :return: True if successful, False otherwise
+    """
+    raise NotImplementedError
 
-  /**
-     * @fn measurement
-     * @brief Read measurement data
-     * @param co2Concentration Pointer to store CO2 concentration
-     * @param temperature Pointer to store temperature
-     * @param humidity Pointer to store humidity
-     * @param sensorStatus Pointer to store sensor status
-     * @return true if successful, false otherwise
-     */
-  bool measurement(uint16_t* co2Concentration, 
-                                        float* temperature, 
-                                        float* humidity, 
-                                        uint16_t* sensorStatus);
+def set_pressure_compensation(self, pressure: int) -> bool:
+    """
+    Set pressure compensation
+    :param pressure: Pressure compensation value
+    :return: True if successful, False otherwise
+    """
+    raise NotImplementedError
 
-  /**
-     * @fn setRHTcompensation
-     * @brief Set temperature and humidity compensation
-     * @param temperature Temperature compensation value
-     * @param humidity Humidity compensation value
-     * @return true if successful, false otherwise
-     */
-  bool setRHTcompensation(uint16_t temperature, uint16_t humidity);
+def single_measurement(self) -> bool:
+    """
+    Perform a single shot measurement
+    :return: True if successful, False otherwise
+    """
+    raise NotImplementedError
 
-  /**
-     * @fn setPressureCompensation
-     * @brief Set pressure compensation
-     * @param pressure Pressure compensation value
-     * @return true if successful, false otherwise
-     */
-  bool setPressureCompensation(uint16_t pressure);
+def fall_asleep(self) -> bool:
+    """
+    Put the sensor into sleep mode
+    :return: True if successful, False otherwise
+    """
+    raise NotImplementedError
 
-  /**
-     * @fn singleShot
-     * @brief Perform a single shot measurement
-     * @n The sensor needs 500 milliseconds to execute this instruction.
-     * @return true if successful, false otherwise
-     */
-  bool singleShot(void);
+def wakeup(self) -> bool:
+    """
+    Wake up the sensor from sleep mode
+    :return: True if successful, False otherwise
+    """
+    raise NotImplementedError
 
-  /**
-     * @fn sleep
-     * @brief Put the sensor into sleep mode
-     * @return true if successful, false otherwise
-     */
-  bool sleep(void);
+def soft_reset(self) -> bool:
+    """
+    Perform a soft reset of the sensor
+    :return: True if successful, False otherwise
+    """
+    raise NotImplementedError
 
-  /**
-     * @fn wakeup
-     * @brief Wake up the sensor from sleep mode
-     * @return true if successful, false otherwise
-     */
-  bool wakeup(void);
+def factory_reset(self) -> bool:
+    """
+    Perform a factory reset of the sensor
+    :return: True if successful, False otherwise
+    """
+    raise NotImplementedError
 
-  /**
-     * @fn softRest
-     * @brief Perform a soft reset of the sensor
-     * @return true if successful, false otherwise
-     */
-  bool softRest(void);
+def enable_testing_mode(self) -> bool:
+    """
+    Enable testing mode
+    :return: True if successful, False otherwise
+    """
+    raise NotImplementedError
 
-  /**
-     * @fn factoryReset
-     * @brief Perform a factory reset of the sensor
-     * @return true if successful, false otherwise
-     */
-  bool factoryReset(void);
+def disable_testing_mode(self) -> bool:
+    """
+    Disable testing mode
+    :return: True if successful, False otherwise
+    """
+    raise NotImplementedError
 
-  /**
-     * @fn enableTestingMode
-     * @brief Enable testing mode
-     * @return true if successful, false otherwise
-     */
-  bool enableTestingMode(void);
-
-  /**
-     * @fn disableTestingMode
-     * @brief Disable testing mode
-     * @return true if successful, false otherwise
-     */
-  bool disableTestingMode(void);
-
-  /**
-     * @fn forcedRecalibration
-     * @brief Perform forced recalibration
-     * @param targetPpm Target PPM value for recalibration
-     * @param frcCorrection Pointer to store the correction value
-     * @return true if successful, false otherwise
-     */
-  bool forcedRecalibration(uint16_t targetPpm, uint16_t* frcCorrection);
+def forced_recalibration(self, target_ppm: int) -> Optional[int]:
+    """
+    Perform forced recalibration
+    :param target_ppm: Target PPM value for recalibration
+    :return: Correction value if successful, None otherwise
+    """
+    raise NotImplementedError
 ```
 
 ## Compatibility
 
 MCU                | Work Well    | Work Wrong   | Untested    | Remarks
 ------------------ | :----------: | :----------: | :---------: | -----
-Arduino uno        |      √       |              |             | 
-Mega2560           |      √       |              |             | 
-Leonardo           |      √       |              |             | 
-ESP32              |      √       |              |             | 
-micro:bit          |      √       |              |             | 
-raspberry pi       |      √       |              |             |     
+raspberry pi 4     |      √       |              |             |     
+raspberry pi 5     |              |              |      √      |     
 <br>
 
 ## History

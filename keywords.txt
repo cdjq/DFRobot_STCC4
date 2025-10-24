@@ -20,7 +20,7 @@ stopMeasurement	KEYWORD2
 measurement	KEYWORD2
 setRHTcompensation	KEYWORD2
 setPressureCompensation	KEYWORD2
-singleShot	KEYWORD2
+singleMeasurement	KEYWORD2
 sleep	KEYWORD2
 wakeup	KEYWORD2
 softRest	KEYWORD2

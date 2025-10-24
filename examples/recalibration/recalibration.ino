@@ -22,7 +22,7 @@
  * The target CO2 concentration to calibrate. 
  * The input range of CO2 concentration is 0 - 32000 ppm.
  */
-uint16_t target = 600; 
+const uint16_t target = 600; 
 
 /* The frc correction values returned by the sensor are generally not used. */
 uint16_t frcCorrection;
@@ -47,23 +47,25 @@ uint16_t sensorStatus;
 
 /**
  * Set temperature compensation.
+ * The range is 10 - 40℃.
  * The unit is degrees Celsius.
  * It only takes effect when the temperature and humidity sensor is disconnected from the STCC4.
  */
-uint16_t tCompensation = 26;
+const uint16_t tCompensation = 26;
 
 /**
  * Set humidity compensation.
- * The unit is %.
+ * The range is 20 - 80%RH.
  * It only takes effect when the temperature and humidity sensor is disconnected from the STCC4.
  */
-uint16_t hCompensation = 55;
+const uint16_t hCompensation = 55;
 
 /**
- * Set humidity compensation.
+ * Set pressure compensation.
+ * The range is 400 - 1100 hPa.
  * Unit is hPa.
  */
-uint16_t pCompensation = 950;
+const uint16_t pCompensation = 950;
 
 /**
  * The sensor can communicate via two specific addresses (0x64 and 0x65).
@@ -90,15 +92,10 @@ void setup() {
 
   /**
    * Get the ID of the sensor.
-   * The ID values read should all be 0x0901018a.
+   * The ID values read should all be 0x901018A.
    */
-  char id[15];
-  while(!sensor.getID(id)){
-    delay(500);
-    Serial.println("Get ID error!");
-  }
-  sprintf(id, "ID: %02x%02x%02x%02x", id[0], id[1], id[2], id[3]);
-  Serial.println(id);
+  Serial.print("ID: 0x");
+  Serial.println(sensor.getID(), HEX);
   
   /**
     * @brief Set temperature and humidity compensation
@@ -144,7 +141,9 @@ void setup() {
       Serial.print(" ℃ ");
       Serial.print(" humidity:");
       Serial.print(humidity);
-      Serial.println(" % ");
+      Serial.print(" % ");
+      Serial.print("status:");
+      Serial.println(sensorStatus);
     }
   }
 
@@ -183,11 +182,11 @@ void loop() {
     * @param co2Concentration Pointer to store CO2 concentration
     * @param temperature Pointer to store temperature
     * @param humidity Pointer to store humidity
-    * @param sensorStatus Pointer to store sensor status
+    * @param sensorStatus Pointer to store sensor status, 0 means normal, otherwise error.
     * @return true if successful, false otherwise
     */
     if(sensor.measurement(&co2Concentration,&temperature,&humidity,&sensorStatus)){
-      Serial.print("CO2:");
+      Serial.print("After correction, CO2:");
       Serial.print(co2Concentration);
       Serial.print(" ppm ");
       Serial.print(" temperature:");
@@ -195,6 +194,8 @@ void loop() {
       Serial.print(" ℃ ");
       Serial.print(" humidity:");
       Serial.print(humidity);
-      Serial.println(" % ");
+      Serial.print(" % ");
+      Serial.print(" status:");
+      Serial.println(sensorStatus);
     }
 }

@@ -101,15 +101,20 @@ class DFRobot_STCC4:
     def measurement(self) -> Optional[Tuple[int, float, float, int]]:
         """
         Read measurement data
-        :return: Tuple of (co2_concentration, temperature, humidity, sensor_status) if successful, None otherwise
+        :return: Tuple of (co2_concentration, temperature, humidity, sensor_status).
+        co2_concentration : CO2 concentration
+        temperature : Temperature
+        humidity : Humidity
+        sensor_status : Sensor status
+        None : error
         """
         raise NotImplementedError
  
     def set_rht_compensation(self, temperature: int, humidity: int) -> bool:
         """
         Set temperature and humidity compensation
-        :param temperature: Temperature compensation value
-        :param humidity: Humidity compensation value
+        :param temperature: Temperature compensation value, range of 10 to 40 degrees Celsius.
+        :param humidity: Humidity compensation value, range of 20 to 80 percent relative humidity.
         :return: True if successful, False otherwise
         """
         raise NotImplementedError
@@ -117,12 +122,12 @@ class DFRobot_STCC4:
     def set_pressure_compensation(self, pressure: int) -> bool:
         """
         Set pressure compensation
-        :param pressure: Pressure compensation value
+        :param pressure: Pressure compensation value, range of 400 to 1100 hPa
         :return: True if successful, False otherwise
         """
         raise NotImplementedError
  
-    def single_shot(self) -> bool:
+    def single_measurement(self) -> bool:
         """
         Perform a single shot measurement
         :return: True if successful, False otherwise
@@ -174,7 +179,7 @@ class DFRobot_STCC4:
     def forced_recalibration(self, target_ppm: int) -> Optional[int]:
         """
         Perform forced recalibration
-        :param target_ppm: Target PPM value for recalibration
+        :param target_ppm: Target PPM value for recalibration, must be between 0 and 32000 ppm.
         :return: Correction value if successful, None otherwise
         """
         raise NotImplementedError
@@ -290,10 +295,19 @@ class DFRobot_STCC4_I2C(DFRobot_STCC4):
             print(f"Error reading data: {e}")
             return None
  
-    def get_id(self) -> Optional[bytes]:
-        """Get the sensor ID"""
-        raw_data = self._read_data(self.STCC4_GET_ID, 18)
-        return raw_data
+    def get_id(self):
+        """
+        git sensor id
+        Returns:
+            int: 32-bit sensor ID
+        """
+        r_buf = self._read_data(self.STCC4_GET_ID, 18)
+        if r_buf is None or len(r_buf) < 5:
+            return None
+        time.sleep(0.05)
+        id_value = (r_buf[0] << 24) | (r_buf[1] << 16) | (r_buf[3] << 8) | r_buf[4]
+
+        return id_value
  
     def start_measurement(self) -> bool:
         """Start continuous measurement"""
@@ -333,6 +347,8 @@ class DFRobot_STCC4_I2C(DFRobot_STCC4):
  
     def set_rht_compensation(self, temperature: float, humidity: float) -> bool:
         """Set temperature and humidity compensation"""
+        if temperature < 10 or temperature > 40 or humidity < 20 or humidity > 80:
+            return False
         # Convert temperature to raw value
         temp_raw = int((temperature + 45) * 65535 / 175)
         # Convert humidity to raw value
@@ -342,10 +358,12 @@ class DFRobot_STCC4_I2C(DFRobot_STCC4):
  
     def set_pressure_compensation(self, pressure: int) -> bool:
         """Set pressure compensation"""
+        if pressure < 400 or pressure > 1100:
+            return False
         pressure_raw = pressure * 50
         return self._write_data(self.STCC4_SET_PRESSURE_COMPENSATION, [pressure_raw])
  
-    def single_shot(self) -> bool:
+    def single_measurement(self) -> bool:
         """Perform single shot measurement"""
         return self._write_cmd16(self.STCC4_SINGLE_SHOT)
  
@@ -383,6 +401,8 @@ class DFRobot_STCC4_I2C(DFRobot_STCC4):
  
     def forced_recalibration(self, target_ppm: int) -> Optional[int]:
         """Perform forced recalibration"""
+        if  target_ppm > 32000:
+            return None
         if not self._write_data(self.STCC4_FORC_CALIBRATION, [target_ppm]):
             return None
             

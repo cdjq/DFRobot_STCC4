@@ -94,12 +94,12 @@ DFRobot_STCC4 是一个为驱动Sensirion公司新型CO2测量芯片 STCC4 而�
   bool setPressureCompensation(uint16_t pressure);
 
   /**
-     * @fn singleShot
+     * @fn singleMeasurement
      * @brief 进行一次单次测量
      * @n 该传感器执行此指令需要 500 毫秒的时间。
      * @return true 成功， false 失败
      */
-  bool singleShot(void);
+  bool singleMeasurement(void);
 
   /**
      * @fn sleep

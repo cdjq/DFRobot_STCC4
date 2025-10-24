@@ -18,14 +18,11 @@
 #include <Arduino.h>
 #include <Wire.h>
 
-
+//#define ENABLE_DBG ///< Enable this macro to see the detailed execution process of the program
+#ifdef ENABLE_DBG
 #define DBG(...) {Serial.print("[");Serial.print(__FUNCTION__); Serial.print("(): "); Serial.print(__LINE__); Serial.print(" ] "); Serial.println(__VA_ARGS__);}
-
-#ifdef min
-#undef min
-#endif
-#ifdef max
-#undef max
+#else
+#define DBG(...)
 #endif
 
 #define DFRobot_STCC4_I2C_ADDR 0x64
@@ -76,10 +73,9 @@ public:
   /**
      * @fn getID
      * @brief Get the ID of the sensor
-     * @param id Pointer to a character array to store the ID
-     * @return true if successful, false otherwise
+     * @return The ID of the sensor.
      */
-  bool getID(char *id);
+  uint32_t getID(void);
 
   /**
      * @fn startMeasurement
@@ -113,27 +109,27 @@ public:
   /**
      * @fn setRHTcompensation
      * @brief Set temperature and humidity compensation
-     * @param temperature Temperature compensation value
-     * @param humidity Humidity compensation value
-     * @return true if successful, false otherwise
+     * @param temperature Temperature compensation value, range of 10 to 40 degrees Celsius.
+     * @param humidity Humidity compensation value, range of 20 to 80%RH.
+     * @return true if successful; false otherwise, maybe the temperature/humidity value is out of range.
      */
   bool setRHTcompensation(uint16_t temperature, uint16_t humidity);
 
   /**
      * @fn setPressureCompensation
      * @brief Set pressure compensation
-     * @param pressure Pressure compensation value
-     * @return true if successful, false otherwise
+     * @param pressure Pressure compensation value, range of 400 to 1100 hPa
+     * @return true if successful; false otherwise, maybe the pressure value is out of range.
      */
   bool setPressureCompensation(uint16_t pressure);
 
   /**
-     * @fn singleShot
+     * @fn singleMeasurement
      * @brief Perform a single shot measurement
      * @n The sensor needs 500 milliseconds to execute this instruction.
      * @return true if successful, false otherwise
      */
-  bool singleShot(void);
+  bool singleMeasurement(void);
 
   /**
      * @fn sleep
@@ -180,9 +176,9 @@ public:
   /**
      * @fn forcedRecalibration
      * @brief Perform forced recalibration
-     * @param targetPpm Target PPM value for recalibration
+     * @param targetPpm Target PPM value for recalibration, must be between 0 and 32000 ppm.
      * @param frcCorrection Pointer to store the correction value
-     * @return true if successful, false otherwise
+     * @return true if successful; false otherwise, maybe the target PPM value is out of range.
      */
   bool forcedRecalibration(uint16_t targetPpm, uint16_t* frcCorrection);
 

@@ -99,12 +99,12 @@ To use this library, first download the library file, paste it into the \Arduino
   bool setPressureCompensation(uint16_t pressure);
 
   /**
-     * @fn singleShot
+     * @fn singleMeasurement
      * @brief Perform a single shot measurement
      * @n The sensor needs 500 milliseconds to execute this instruction.
      * @return true if successful, false otherwise
      */
-  bool singleShot(void);
+  bool singleMeasurement(void);
 
   /**
      * @fn sleep

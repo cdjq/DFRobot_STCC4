@@ -24,145 +24,126 @@ DFRobot_STCC4 是一个为驱动Sensirion公司新型CO2测量芯片 STCC4 而�
 
 ## 库安装
 
-要使用此库，请首先下载库文件，将其粘贴到“Arduino\libraries”目录中，然后打开“示例”文件夹并运行该文件夹中的演示程序。
+要使用此库，请首先下载库文件，将文件上传至你的树莓派设备上，然后进入examples文件夹，运行示例程序。
 
 
 ## 方法
 
-```C++
-/**
-     * @fn calculationCRC
-     * @brief 计算数据的循环冗余校验码（CRC）
-     * @param data 需要计算的CRC数据
-     * @param length 数据长度
-     * @return CRC
-     */
-  uint8_t calculationCRC(uint16_t *data, size_t length);
+```python
+def get_id(self) -> Optional[bytes]:
+        """
+        获取传感器ID
+        :return: 如果成功返回传感器ID字节，否则返回None
+        """
+        raise NotImplementedError
+ 
+def start_measurement(self) -> bool:
+    """
+    开始连续测量
+    :return: 如果成功返回True，否则返回False
+    """
+    raise NotImplementedError
 
-  /**
-     * @fn getID
-     * @brief 获取传感器的ID
-     * @param id 获取的ID
-     * @return true 成功， false 失败
-     */
-  bool getID(char *id);
+def stop_measurement(self) -> bool:
+    """
+    停止连续测量
+    :return: 如果成功返回True，否则返回False
+    """
+    raise NotImplementedError
 
-  /**
-     * @fn startMeasurement
-     * @brief 开启传感器连续测量
-     * @return true 启动成功， false 启动失败
-     */
-  bool startMeasurement(void);
+def measurement(self) -> Optional[Tuple[int, float, float, int]]:
+    """
+    读取测量数据
+    :return: (co2_concentration, temperature, humidity, sensor_status)元组。
+    co2_concentration : CO2浓度
+    temperature : 温度
+    humidity : 湿度
+    sensor_status : 传感器状态
+    None : 错误
+    """
+    raise NotImplementedError
 
-  /**
-     * @fn stopMeasurement
-     * @brief 停止传感器连续测量
-     * @n 该传感器执行此指令需要 1200 毫秒。
-     * @return true 停止成功， false 停止失败
-     */
-  bool stopMeasurement(void);
+def set_rht_compensation(self, temperature: int, humidity: int) -> bool:
+    """
+    设置温湿度补偿
+    :param temperature: 温度补偿值
+    :param humidity: 湿度补偿值
+    :return: 如果成功返回True，否则返回False
+    """
+    raise NotImplementedError
 
-  /**
-     * @fn measurement
-     * @brief 读取测量数据
-     * @param co2Concentration 用于存储二氧化碳浓度的指针
-     * @param temperature 用于存储温度的指针
-     * @param humidity 用于存储湿度的指针
-     * @param sensorStatus 用于存储传感器状态的指针
-     * @return true 获取成功， false 获取失败
-     */
-  bool measurement(uint16_t* co2Concentration, 
-                                        float* temperature, 
-                                        float* humidity, 
-                                        uint16_t* sensorStatus);
+def set_pressure_compensation(self, pressure: int) -> bool:
+    """
+    设置压力补偿
+    :param pressure: 压力补偿值
+    :return: 如果成功返回True，否则返回False
+    """
+    raise NotImplementedError
 
-  /**
-     * @fn setRHTcompensation
-     * @brief 手动设置温度和湿度补偿
-     * @param temperature 温度补偿值
-     * @param humidity 湿度补偿值
-     * @return true 设置成功， false 设置失败
-     */
-  bool setRHTcompensation(uint16_t temperature, uint16_t humidity);
+def single_measurement(self) -> bool:
+    """
+    执行单次测量
+    :return: 如果成功返回True，否则返回False
+    """
+    raise NotImplementedError
 
-  /**
-     * @fn setPressureCompensation
-     * @brief 手动设定压力补偿
-     * @param pressure 压力补偿值
-     * @return true 设置成功， false 设置失败
-     */
-  bool setPressureCompensation(uint16_t pressure);
+def fall_asleep(self) -> bool:
+    """
+    使传感器进入睡眠模式
+    :return: 如果成功返回True，否则返回False
+    """
+    raise NotImplementedError
 
-  /**
-     * @fn singleShot
-     * @brief 进行一次单次测量
-     * @n 该传感器执行此指令需要 500 毫秒的时间。
-     * @return true 成功， false 失败
-     */
-  bool singleShot(void);
+def wakeup(self) -> bool:
+    """
+    唤醒传感器从睡眠模式
+    :return: 如果成功返回True，否则返回False
+    """
+    raise NotImplementedError
 
-  /**
-     * @fn sleep
-     * @brief 将传感器置于休眠模式
-     * @return true 设置成功， false 设置失败
-     */
-  bool sleep(void);
+def soft_reset(self) -> bool:
+    """
+    执行传感器软重置
+    :return: 如果成功返回True，否则返回False
+    """
+    raise NotImplementedError
 
-  /**
-     * @fn wakeup
-     * @brief 将传感器从休眠模式唤醒
-     * @return true 设置成功， false 设置失败
-     */
-  bool wakeup(void);
+def factory_reset(self) -> bool:
+    """
+    执行传感器出厂重置
+    :return: 如果成功返回True，否则返回False
+    """
+    raise NotImplementedError
 
-  /**
-     * @fn softRest
-     * @brief 对传感器进行软复位操作
-     * @return true 设置成功， false 设置失败
-     */
-  bool softRest(void);
+def enable_testing_mode(self) -> bool:
+    """
+    启用测试模式
+    :return: 如果成功返回True，否则返回False
+    """
+    raise NotImplementedError
 
-  /**
-     * @fn factoryReset
-     * @brief 对传感器进行工厂复位操作
-     * @return true 设置成功， false 设置失败
-     */
-  bool factoryReset(void);
+def disable_testing_mode(self) -> bool:
+    """
+    禁用测试模式
+    :return: 如果成功返回True，否则返回False
+    """
+    raise NotImplementedError
 
-  /**
-     * @fn enableTestingMode
-     * @brief 启用测试模式
-     * @return true 设置成功， false 设置失败
-     */
-  bool enableTestingMode(void);
-
-  /**
-     * @fn disableTestingMode
-     * @brief 禁用测试模式
-     * @return true 设置成功， false 设置失败
-     */
-  bool disableTestingMode(void);
-
-  /**
-     * @fn forcedRecalibration
-     * @brief 进行强制重新校准
-     * @param targetPpm 重新校准的目标 PPM 值
-     * @param frcCorrection 用于存储修正值的指针
-     * @return true 校准成功， false 校准失败
-     */
-  bool forcedRecalibration(uint16_t targetPpm, uint16_t* frcCorrection);
+def forced_recalibration(self, target_ppm: int) -> Optional[int]:
+    """
+    执行强制重新校准
+    :param target_ppm: 重新校准的目标PPM值
+    :return: 如果成功返回校正值，否则返回None
+    """
+    raise NotImplementedError
 ```
 
 ## 兼容性
 
 MCU                | Work Well    | Work Wrong   | Untested    | Remarks
 ------------------ | :----------: | :----------: | :---------: | -----
-Arduino uno        |      √       |              |             | 
-Mega2560           |      √       |              |             | 
-Leonardo           |      √       |              |             | 
-ESP32              |      √       |              |             | 
-micro:bit          |      √       |              |             | 
-raspberry pi       |      √       |              |             |     
+raspberry pi 4     |      √       |              |             |     
+raspberry pi 5     |              |              |      √      |     
 <br>
 
 ## 历史
