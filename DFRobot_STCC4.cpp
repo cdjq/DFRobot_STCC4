@@ -48,15 +48,24 @@ uint8_t DFRobot_STCC4::calculationCRC(uint16_t *data, size_t length)
 uint32_t DFRobot_STCC4::getID(void)  
 {
   for (uint8_t i = 0; i < 5; i++){
+    delay(200);
     uint8_t rBuf[18] = {0};
     uint32_t id;
     writeCMD16(STCC4_GET_ID);
     readData(rBuf, 18);
-    id = ((uint32_t)rBuf[0] << 24) | ((uint32_t)rBuf[1] << 16) | ((uint32_t)rBuf[3] << 8) | (uint32_t)rBuf[4];
-    if(id == 0x901018A){
+    
+    uint16_t data1 = ((uint16_t)rBuf[0] << 8) | rBuf[1];
+    uint16_t data2 = ((uint16_t)rBuf[3] << 8) | rBuf[4];
+    uint8_t crc1 = rBuf[2];
+    uint8_t crc2 = rBuf[5];
+    
+    uint8_t calculatedCrc1 = calculationCRC(&data1, 1);
+    uint8_t calculatedCrc2 = calculationCRC(&data2, 1);
+    
+    if(crc1 == calculatedCrc1 || crc2 == calculatedCrc2) {
+      id = ((uint32_t)rBuf[0] << 24) | ((uint32_t)rBuf[1] << 16) | ((uint32_t)rBuf[3] << 8) | (uint32_t)rBuf[4];
       return id;
     }
-    delay(200);
   }
   
   return 0;

@@ -290,18 +290,35 @@ class DFRobot_STCC4_I2C(DFRobot_STCC4):
  
     def get_id(self):
         """
-        git sensor id
+        Get sensor ID with CRC check
         Returns:
             int: 32-bit sensor ID
         """
         for i in range(5):
             r_buf = self._read_data(self.STCC4_GET_ID, 18)
-            id_value = (r_buf[0] << 24) | (r_buf[1] << 16) | (r_buf[3] << 8) | r_buf[4]
-            if id_value == 0x901018A:
-                return id_value
+            if r_buf is None or len(r_buf) < 18:
+                time.sleep(0.2)
+                continue
+                
+            # Extract data pairs and their CRCs
+            data1 = (r_buf[0] << 8) | r_buf[1]
+            data2 = (r_buf[3] << 8) | r_buf[4]
+            crc1 = r_buf[2]
+            crc2 = r_buf[5]
+            
+            # Calculate CRCs
+            calculated_crc1 = self.calculation_crc([data1])
+            calculated_crc2 = self.calculation_crc([data2])
+            
+            # Check CRCs
+            if crc1 == calculated_crc1 and crc2 == calculated_crc2:
+                id_value = (r_buf[0] << 24) | (r_buf[1] << 16) | (r_buf[3] << 8) | r_buf[4]
+                if id_value == 0x901018A:
+                    return id_value
+                    
             time.sleep(0.2)
 
-        return id_value
+        return 0
  
     def start_measurement(self) -> bool:
         """Start continuous measurement"""

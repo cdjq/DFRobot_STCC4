@@ -57,8 +57,6 @@ sensor = DFRobot_STCC4_I2C(addr = ADDR)
 
 def setup():
     print("This is a demo of single reading sensor data.")
-    print("This demo will display a \"Data write failed\", but this is a normal occurrence.")
-    print("Because the sensor has entered sleep mode, there will be no response when it is awakened.\n\n")
 
     # Wake up the sensor
     sensor.wakeup()
